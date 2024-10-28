@@ -39,15 +39,25 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   List<types.Message> messages = [];
 
-  final _user = const types.User(id: "0",);
+  @override
+  void initState() {
+    super.initState();
+    _loadMessage();
+  }
+
+  final _user = const types.User(
+    id: "0",
+  );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      )
-    );
+        appBar: AppBar(
+      backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      title: Text(widget.title),
+    ));
   }
+}
+
+void _loadMessage() {
 }
