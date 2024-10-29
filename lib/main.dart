@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
@@ -5,6 +6,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:uuid/uuid.dart';
 import 'package:uuid/v1.dart';
+import 'package:uuid/v4.dart';
 
 void main() {
   //runApp(const MyApp());
@@ -45,19 +47,29 @@ class _MyHomePageState extends State<MyHomePage> {
     _loadMessage();
   }
 
-  final _user = const types.User(
-    id: "0",
+  final _user = types.User(
+    id: UniqueKey().toString(),
   );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-      backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      title: Text(widget.title),
+      body: Chat(messages: messages, //abbiniamo il widget con i messaggi 
+      onSendPressed: onSendPressed, 
+      user: user),
     ));
   }
-}
 
-void _loadMessage() {
+  void _loadMessage() async {
+    final response = await rootBundle.loadString(
+        "assets/messaggi.json"); //Prendiamo il contenuto del file json dentro la stringa
+    final _messages = (jsonDecode(response)
+            as List) // Lo deserializziamo in List di string
+        .map((e) => types.Message.fromJson(e as Map<String,
+            dynamic>)) //mappiamo  ogni elemento della lista in un oggetto Message
+        .toList(); //Lo convertiamo in una lista di oggetti
+    setState(() {
+      messages = _messages;
+    });
+  }
 }
