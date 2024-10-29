@@ -1,14 +1,14 @@
 // ignore_for_file: unused_local_variable
 
 import 'dart:convert';
+import 'dart:developer';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:uuid/uuid.dart';
-import 'package:uuid/v1.dart';
-import 'package:uuid/v4.dart';
 
 void main() {
   //runApp(const MyApp());
@@ -79,9 +79,10 @@ class _MyHomePageState extends State<MyHomePage> {
             as List) // Lo deserializziamo in List di string
         .map((e) => types.Message.fromJson(e as Map<String,
             dynamic>)) //mappiamo  ogni elemento della lista in un oggetto Message
-        .toList(); //Lo cogit add .nvertiamo in una lista di oggetti
+        .toList(); //Lo convertiamo in una lista di oggetti
     setState(() {
       messages = _messages;
+      messages.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
     });
   }
 
@@ -96,15 +97,18 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _handleSendPressed(types.PartialText p1) {
-    final types.TextMessage textMessage =
-        types.TextMessage(author: _user, id: const Uuid().v4(), text: p1.text);
-
+    final types.TextMessage textMessage = types.TextMessage(
+        author: _user,
+        id: const Uuid().v4(),
+        text: p1.text,
+        createdAt: DateTime.now().millisecondsSinceEpoch);
     addMessage(textMessage);
   }
 
   void addMessage(types.TextMessage message) {
     setState(() {
       messages.insert(0, message);
+      log(message.toString());
     });
   }
 }
