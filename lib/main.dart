@@ -1,7 +1,6 @@
 // ignore_for_file: unused_local_variable
 
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
@@ -9,6 +8,7 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:uuid/uuid.dart';
+import 'package:path_provider/path_provider.dart';
 
 void main() {
   //runApp(const MyApp());
@@ -96,6 +96,11 @@ class _MyHomePageState extends State<MyHomePage> {
     aggiorna la lista*/
   }
 
+  Future<String> getFilePath() async {
+    final directory = await getApplicationDocumentsDirectory();
+    return '${directory.path}/messaggi.json';
+  }
+
   void _handleSendPressed(types.PartialText p1) {
     final types.TextMessage textMessage = types.TextMessage(
         author: _user,
@@ -108,7 +113,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void addMessage(types.TextMessage message) {
     setState(() {
       messages.insert(0, message);
-      log(message.toString());
     });
   }
 }
