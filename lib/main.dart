@@ -109,7 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
         id: const Uuid().v4(),
         text: p1.text,
         createdAt: DateTime.now().millisecondsSinceEpoch);
-        
+    
     addMessage(textMessage);
   }
   void addMessage(types.TextMessage message) {
