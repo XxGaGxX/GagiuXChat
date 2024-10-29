@@ -103,11 +103,6 @@ class _MyHomePageState extends State<MyHomePage> {
     aggiorna la lista*/
   }
 
-  Future<String> getFilePath() async {
-    final directory = await getApplicationDocumentsDirectory();
-    return '${directory.path}/messaggi.json';
-  }
-
   void _handleSendPressed(types.PartialText p1) {
     final types.TextMessage textMessage = types.TextMessage(
         author: _user,
@@ -117,7 +112,6 @@ class _MyHomePageState extends State<MyHomePage> {
         
     addMessage(textMessage);
   }
-
   void addMessage(types.TextMessage message) {
     setState(() {
       messages.insert(0, message);
