@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Test',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.black),
         useMaterial3: true,
       ),
       home: const MyHomePage(title: 'Chat'),
@@ -56,14 +56,21 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Chat(
+      appBar: AppBar(
+        title: Text("GagioX Chat"),
+        backgroundColor:  const Color.fromARGB(255, 57, 21, 118),
+        foregroundColor: Colors.white,
+      ),
+      body: Chat(
       messages: messages, //abbiniamo il widget con i messaggi
       onPreviewDataFetched: _handlePreviewDatafetched,
       onSendPressed: _handleSendPressed,
       showUserAvatars: true,
       showUserNames: true,
+
       user: _user,
-      theme: const DefaultChatTheme(
+      theme: const DarkChatTheme(
+        backgroundColor: Colors.black,
         seenIcon: Text(
           "read",
           style: TextStyle(fontSize: 10),
@@ -107,6 +114,7 @@ class _MyHomePageState extends State<MyHomePage> {
         id: const Uuid().v4(),
         text: p1.text,
         createdAt: DateTime.now().millisecondsSinceEpoch);
+        
     addMessage(textMessage);
   }
 

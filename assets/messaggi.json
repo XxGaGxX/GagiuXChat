@@ -8,8 +8,13 @@
         "createdAt": 1729351200000,
         "id": "64d5528c-1e5d-4dc8-a626-57e5132ad151",
         "status": "seen",
-        "text": "E' morto liam payne...",
-        "type": "text"
+        "height" :1280,
+        "type": "image",
+        "name" : "Goku",
+        "size" : 585000,
+        "uri" : "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/65506d67-f277-4f6e-bb11-9a0b5f38ecc2/d3e8guy-cdccd524-3a6b-4b1b-bad3-7ceb459e4784.png/v1/fit/w_828,h_1000/goku_ssj2_scrappy_link_by_changopepe_d3e8guy-414w-2x.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTA4NiIsInBhdGgiOiJcL2ZcLzY1NTA2ZDY3LWYyNzctNGY2ZS1iYjExLTlhMGI1ZjM4ZWNjMlwvZDNlOGd1eS1jZGNjZDUyNC0zYTZiLTRiMWItYmFkMy03Y2ViNDU5ZTQ3ODQucG5nIiwid2lkdGgiOiI8PTkwMCJ9XV0sImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl19._iTk8nmw9HpH3qTIkuCnY9iW0HbdXufUZGbLFyh28sg",
+        "width" : 1920
+
       },
       {
         "author": {
@@ -20,7 +25,7 @@
         "createdAt": 1729355400000,
         "id": "1a9c4587-3dd4-419d-a496-ed597de72e60",
         "status": "seen",
-        "text": "Come è morto liam paaaaayne????",
+        "text": "Avete fatto la writing?",
         "type": "text"
       },
       {
@@ -32,7 +37,7 @@
         "createdAt": 1729355700000,
         "id": "819abee0-b5f0-4042-8085-4e6479ccd36b",
         "status": "seen",
-        "text": "E Mootto?",
+        "text": "ah",
         "type": "text"
       },
       {
@@ -44,7 +49,7 @@
         "createdAt": 1729355820000,
         "id": "4c56d552-6e22-40cc-a80e-762f3e8e21da",
         "status": "seen",
-        "text": "TEZZO PIANO ?!?!",
+        "text": "rip",
         "type": "text"
       }
     ]
