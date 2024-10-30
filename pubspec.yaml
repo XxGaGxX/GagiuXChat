@@ -40,6 +40,7 @@ dependencies:
   flutter_chat_types: ^3.6.2
   intl: ^0.19.0
   path_provider: ^2.1.4
+  quickalert: ^1.1.0
 
 dev_dependencies:
   flutter_test:

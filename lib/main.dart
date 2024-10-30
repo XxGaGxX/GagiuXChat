@@ -9,6 +9,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:uuid/uuid.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:quickalert/quickalert.dart';
 
 void main() {
   //runApp(const MyApp());
@@ -50,36 +51,39 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   final _user = types.User(
-    id: UniqueKey().toString(),
+    id: Uuid().v4(),
+    firstName: "Diego",
+    lastName: "Vagnini",
   );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("GagioX Chat"),
-        backgroundColor:  const Color.fromARGB(255, 57, 21, 118),
-        foregroundColor: Colors.white,
-      ),
-      body: Chat(
-      messages: messages, //abbiniamo il widget con i messaggi
-      onPreviewDataFetched: _handlePreviewDatafetched,
-      onSendPressed: _handleSendPressed,
-      showUserAvatars: true,
-      showUserNames: true,
-
-      user: _user,
-      theme: const DarkChatTheme(
-        backgroundColor: Colors.black,
-        seenIcon: Text(
-          "read",
-          style: TextStyle(fontSize: 10),
+        appBar: AppBar(
+          title: Text("GagioX Chat"),
+          backgroundColor: const Color.fromARGB(255, 57, 21, 118),
+          foregroundColor: Colors.white,
         ),
-      ),
-    ));
+        body: Chat(
+          messages: messages, //abbiniamo il widget con i messaggi
+          onPreviewDataFetched: _handlePreviewDatafetched,
+          onSendPressed: _handleSendPressed,
+          showUserAvatars: true,
+          showUserNames: true,
+
+          user: _user,
+          theme: const DarkChatTheme(
+            backgroundColor: Colors.black,
+            seenIcon: Text(
+              "read",
+              style: TextStyle(fontSize: 10),
+            ),
+          ),
+        ));
   }
 
   void _loadMessage() async {
+    
     final response = await rootBundle.loadString(
         "assets/messaggi.json"); //Prendiamo il contenuto del file json dentro la stringa
     final _messages = (jsonDecode(response)
@@ -109,12 +113,32 @@ class _MyHomePageState extends State<MyHomePage> {
         id: const Uuid().v4(),
         text: p1.text,
         createdAt: DateTime.now().millisecondsSinceEpoch);
-    
+
     addMessage(textMessage);
   }
-  void addMessage(types.TextMessage message) {
-    setState(() {
-      messages.insert(0, message);
-    });
+
+  void addMessage(types.TextMessage message) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File("${directory.path}/messaggi.json");
+    if (await file.exists() == false) {
+      QuickAlert.show(
+          context: context,
+          type: QuickAlertType.error,
+          title: "Ops...",
+          text: "Non esiste il file che memorizza le chat");
+    } else {
+      setState(() {
+        messages.insert(0, message);
+      });
+      final List<Map<String, dynamic>> jsonMessages =
+          messages.map((message) => message.toJson()).toList(); //Convertiamo
+      //ogni elemento della lista in un oggetto json
+      final String JsonString = jsonEncode(jsonMessages);
+      setState(() {
+        file.writeAsString(JsonString);
+      });
+      QuickAlert.show(
+          context: context, type: QuickAlertType.info, text: JsonString);
+    }
   }
 }
