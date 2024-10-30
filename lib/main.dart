@@ -83,8 +83,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _loadMessage() async {
-    final response = await rootBundle.loadString("assets/messaggi.json"); //Prendiamo il contenuto del file json dentro la stringa
-    final _messages = (jsonDecode(response) as List) // Lo deserializziamo in List di string
+    final response = await rootBundle.loadString(
+        "assets/messaggi.json"); //Prendiamo il contenuto del file json dentro la stringa
+    final _messages = (jsonDecode(response)
+            as List) // Lo deserializziamo in List di string
         .map((e) => types.Message.fromJson(e as Map<String,
             dynamic>)) //mappiamo  ogni elemento della lista in un oggetto Message
         .toList(); //Lo convertiamo in una lista di oggetti
@@ -109,19 +111,31 @@ class _MyHomePageState extends State<MyHomePage> {
         author: _user,
         id: const Uuid().v4(),
         text: p1.text,
-        createdAt: DateTime.now().millisecondsSinceEpoch);
+        createdAt: DateTime.now().millisecondsSinceEpoch
+      );
 
     addMessage(textMessage);
   }
 
-  void addMessage(types.TextMessage message) async {
+
+  Future<String> getPath()async{
     final directory = await getApplicationDocumentsDirectory();
-    final file = File("${directory.path}/messaggiNoRO.json");
+    return directory.path;
+  }
+
+  void addMessage(types.TextMessage message) async {
     setState(() {
       messages.insert(0, message);
     });
-
-    
-
   }
 }
+
+
+
+/* 
+    Prossimo step :
+    Bisogna aggiornare il codice per gestire la scrittura di nuovi messaggi, 
+    se l'utente scriverà un nuovo messaggio, dovrà essere caricato nel JSON dinamico,
+    per poi manualmente chiamare _loadMessages(), dove al suo interno verrà aggiunta una parte
+    che caricherà i messaggi contenuti nel JSON dinamico, e li aggiungerà alla lista dei messaggi.
+*/
