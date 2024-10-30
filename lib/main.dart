@@ -87,7 +87,8 @@ class _MyHomePageState extends State<MyHomePage> {
         "assets/messaggi.json"); //Prendiamo il contenuto del file json dentro la stringa
     final _messages = (jsonDecode(response)
             as List) // Lo deserializziamo in List di string
-        .map((e) => types.Message.fromJson(e as Map<String,
+        .map((e) => types.Message.fromJson(e as Map<
+            String, //Qua devo caricare il json statico e dinamico
             dynamic>)) //mappiamo  ogni elemento della lista in un oggetto Message
         .toList(); //Lo convertiamo in una lista di oggetti
     setState(() {
@@ -111,22 +112,46 @@ class _MyHomePageState extends State<MyHomePage> {
         author: _user,
         id: const Uuid().v4(),
         text: p1.text,
-        createdAt: DateTime.now().millisecondsSinceEpoch
-      );
-
+        createdAt: DateTime.now().millisecondsSinceEpoch);
     addMessage(textMessage);
   }
 
-
-  Future<String> getPath()async{
+  Future<String> getPath() async {
     final directory = await getApplicationDocumentsDirectory();
     return directory.path;
   }
 
   void addMessage(types.TextMessage message) async {
+    List<dynamic> mesJsonDy =
+        await readJsonDy(); //creiamo una lista di messaggi
+
+    _showAlert(mesJsonDy[0].toString());
+
+    String _mess = jsonEncode(message); //converto il messaggio in JSON
+    _showAlert(_mess);
+
+    mesJsonDy.add(_mess);
+
     setState(() {
-      messages.insert(0, message);
+      messages.insert(0,
+          message); // Qui devo caricare il messaggio anche nell'JSON dinamico
     });
+  }
+
+  Future<List<dynamic>> readJsonDy() async {
+    final path = await getPath();
+    final file = File('$path/messaggiNoRO.json'); //Troviamo il Json dinamico
+    if (await file.exists() && file.lengthSync() > 0) {
+      //Se il file esiste e non è vuoto
+      final content = await file.readAsString();
+      return jsonDecode(content);
+    } else {
+      return [];
+    }
+  }
+
+  void _showAlert(String string) {
+    QuickAlert.show(context: context, type: QuickAlertType.info, text: string);
   }
 }
 
