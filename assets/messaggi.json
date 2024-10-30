@@ -51,5 +51,20 @@
         "status": "seen",
         "text": "rip",
         "type": "text"
+      },
+      {
+        "author": {
+          "firstName": "Yamine",
+          "id": "e04ef207-978b-4b83-9574-a58ed655628e",
+          "lastName": "Yamal"
+        },
+        "createdAt": 1729356720000,
+        "id": "4cd76c39-ffd2-4d2d-84a8-481bc35d7751",
+        "mimeType": "application/pdf",
+        "name": "Chi è Batman?",
+        "size": 10550000,
+        "status": "seen",
+        "type": "file",
+        "uri": "https://www.esmadrid.com/sites/default/files/documentos/madrid_imprescindible_2016_ing_web_0.pdf"
       }
     ]

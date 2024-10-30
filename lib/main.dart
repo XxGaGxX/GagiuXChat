@@ -83,11 +83,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _loadMessage() async {
-    
-    final response = await rootBundle.loadString(
-        "assets/messaggi.json"); //Prendiamo il contenuto del file json dentro la stringa
-    final _messages = (jsonDecode(response)
-            as List) // Lo deserializziamo in List di string
+    final response = await rootBundle.loadString("assets/messaggi.json"); //Prendiamo il contenuto del file json dentro la stringa
+    final _messages = (jsonDecode(response) as List) // Lo deserializziamo in List di string
         .map((e) => types.Message.fromJson(e as Map<String,
             dynamic>)) //mappiamo  ogni elemento della lista in un oggetto Message
         .toList(); //Lo convertiamo in una lista di oggetti
@@ -119,26 +116,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void addMessage(types.TextMessage message) async {
     final directory = await getApplicationDocumentsDirectory();
-    final file = File("${directory.path}/messaggi.json");
-    if (await file.exists() == false) {
-      QuickAlert.show(
-          context: context,
-          type: QuickAlertType.error,
-          title: "Ops...",
-          text: "Non esiste il file che memorizza le chat");
-    } else {
-      setState(() {
-        messages.insert(0, message);
-      });
-      final List<Map<String, dynamic>> jsonMessages =
-          messages.map((message) => message.toJson()).toList(); //Convertiamo
-      //ogni elemento della lista in un oggetto json
-      final String JsonString = jsonEncode(jsonMessages);
-      setState(() {
-        file.writeAsString(JsonString);
-      });
-      QuickAlert.show(
-          context: context, type: QuickAlertType.info, text: JsonString);
-    }
+    final file = File("${directory.path}/messaggiNoRO.json");
+    setState(() {
+      messages.insert(0, message);
+    });
+
+    
+
   }
 }
