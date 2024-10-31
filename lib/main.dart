@@ -43,6 +43,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   List<types.Message> messages = [];
+  late List<dynamic> mesJsonDy;
 
   @override
   void initState() {
@@ -85,6 +86,8 @@ class _MyHomePageState extends State<MyHomePage> {
   void _loadMessage() async {
     final response = await rootBundle.loadString(
         "assets/messaggi.json"); //Prendiamo il contenuto del file json dentro la stringa
+    //final List<Message> dynJson = await readJsonDy();
+
     final _messages = (jsonDecode(response)
             as List) // Lo deserializziamo in List di string
         .map((e) => types.Message.fromJson(e as Map<
@@ -93,6 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
         .toList(); //Lo convertiamo in una lista di oggetti
     setState(() {
       messages = _messages;
+      //messages += dynJson.cast<types.Message>();
       messages.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
     });
   }
@@ -122,15 +126,17 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void addMessage(types.TextMessage message) async {
-    List<dynamic> mesJsonDy =
-        await readJsonDy(); //creiamo una lista di messaggi
+    mesJsonDy = await readJsonDy(); //creiamo una lista di messaggi
 
-    _showAlert(mesJsonDy[0].toString());
+    _showAlert(jsonEncode(mesJsonDy));
 
     String _mess = jsonEncode(message); //converto il messaggio in JSON
-    _showAlert(_mess);
 
-    mesJsonDy.add(_mess);
+    mesJsonDy.insert(0, _mess);
+
+    //_showAlert(mesJsonDy.toString());
+
+    await writeJson(mesJsonDy); //aggiungiamo il messaggio alla lista
 
     setState(() {
       messages.insert(0,
@@ -138,7 +144,14 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  Future<List<dynamic>> readJsonDy() async {
+  Future<void> writeJson(List<dynamic> messages) async {
+    final path = await getPath();
+    final file = File('$path/messaggiNoRO.json');
+    await file.writeAsString(
+        jsonEncode(messages)); // Scrivi la lista di messaggi nel file
+  }
+
+  Future<List<Message>> readJsonDy() async {
     final path = await getPath();
     final file = File('$path/messaggiNoRO.json'); //Troviamo il Json dinamico
     if (await file.exists() && file.lengthSync() > 0) {
