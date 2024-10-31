@@ -1,4 +1,4 @@
-// ignore_for_file: unused_local_variable
+// ignore_for_file: unused_local_variable, no_leading_underscores_for_local_identifiers
 
 import 'dart:convert';
 import 'dart:io';
@@ -52,7 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   final _user = types.User(
-    id: Uuid().v4(),
+    id: const Uuid().v4(),
     firstName: "Diego",
     lastName: "Vagnini",
   );
@@ -61,7 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("GagioX Chat"),
+          title: const Text("GagioX Chat"),
           backgroundColor: const Color.fromARGB(255, 57, 21, 118),
           foregroundColor: Colors.white,
         ),
@@ -120,48 +120,14 @@ class _MyHomePageState extends State<MyHomePage> {
     addMessage(textMessage);
   }
 
-  Future<String> getPath() async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
-  }
 
   void addMessage(types.TextMessage message) async {
-    mesJsonDy = await readJsonDy(); //creiamo una lista di messaggi
-
-    _showAlert(jsonEncode(mesJsonDy));
-
-    String _mess = jsonEncode(message); //converto il messaggio in JSON
-
-    mesJsonDy.insert(0, _mess);
-
-    //_showAlert(mesJsonDy.toString());
-
-    await writeJson(mesJsonDy); //aggiungiamo il messaggio alla lista
-
     setState(() {
       messages.insert(0,
           message); // Qui devo caricare il messaggio anche nell'JSON dinamico
     });
   }
 
-  Future<void> writeJson(List<dynamic> messages) async {
-    final path = await getPath();
-    final file = File('$path/messaggiNoRO.json');
-    await file.writeAsString(
-        jsonEncode(messages)); // Scrivi la lista di messaggi nel file
-  }
-
-  Future<List<Message>> readJsonDy() async {
-    final path = await getPath();
-    final file = File('$path/messaggiNoRO.json'); //Troviamo il Json dinamico
-    if (await file.exists() && file.lengthSync() > 0) {
-      //Se il file esiste e non è vuoto
-      final content = await file.readAsString();
-      return jsonDecode(content);
-    } else {
-      return [];
-    }
-  }
 
   void _showAlert(String string) {
     QuickAlert.show(context: context, type: QuickAlertType.info, text: string);
