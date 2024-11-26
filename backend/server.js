@@ -1,11 +1,11 @@
 var express = require("express")
 var app = express();
+const bodyParser = require('body-parser');
 var port = 3000
-// spedizione del messaggio nella porta local host
-app.get("/",(req,res) => {
-    res.sendFile(__dirname + "/index.html")
-})
-// Ascolto
-app.listen(port, () => {
-    console.log("Server in ascolto alla porta" + port)
+
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true }))
+
+app.post('/submit', (req, res) => {
+    console.log(req.body) //visualizza il json su terminale
 })
