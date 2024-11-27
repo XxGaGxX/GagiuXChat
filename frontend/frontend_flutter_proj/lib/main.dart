@@ -1,5 +1,7 @@
+import 'dart:convert';
+import 'package:quickalert/quickalert.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 
 void main() {
@@ -99,18 +101,47 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void InvioJson() {
+  void InvioJson() async {
+    //continuare con l'invio del JSON sul server
     final Message = {
-      'author' : {
-        'firstName' :user[0],
-        'lastName' : user[1],
-        'id' : user[2],
+      'author': {
+        'firstName': user[0],
+        'lastName': user[1],
+        'id': user[2],
       },
-      'createdAt' : DateTime.now().millisecondsSinceEpoch.toString(),
-      'id' : Uuid().v4(),
-      'text' : controllerMessaggio.text,
-      'type' : 'text',
-      'timestamp' : DateTime.now().toIso8601String(),
+      'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
+      'id': Uuid().v4(),
+      'text': controllerMessaggio.text,
+      'type': 'text',
+      'timestamp': DateTime.now().toIso8601String(),
     };
+
+    final response = await http.post(Uri.parse('http://10.0.2.2:3000/'), // indirizzo del server da cambiare
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(Message));
+
+    switch (response.statusCode) {
+      case 200:
+        if (mounted) {
+          //_showAlertSuccess('Messaggio inviato al server con successo');
+          controllerMessaggio.text = 'Messaggio inviato con successo';
+        }
+        break;
+      case 400:
+        controllerMessaggio.text = 'Messaggio non inviato al server';
+    }
+  }
+
+  void _showAlertSuccess(String s) {
+    QuickAlert.show(
+        context: context,
+        type: QuickAlertType.success,
+        text: s,
+        title: 'Successo');
+  }
+
+  void _showAlertError(String s) {
+    QuickAlert.show(
+        context: context, type: QuickAlertType.error, text: s, title: 'Errore');
   }
 }
