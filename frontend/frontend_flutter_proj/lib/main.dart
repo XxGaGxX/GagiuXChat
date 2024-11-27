@@ -45,7 +45,6 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   List<types.Message> messages = [];
 
-
   @override
   void initState() {
     super.initState();
@@ -133,7 +132,7 @@ class _MyHomePageState extends State<MyHomePage> {
     aggiorna la lista*/
   }
 
-  void _handleSendPressed(types.PartialText p1) {
+  void _handleSendPressed(types.PartialText p1) async {
     if (p1.text.isNotEmpty) {
       // Check if the message text is not empty
       final types.TextMessage textMessage = types.TextMessage(
@@ -143,6 +142,12 @@ class _MyHomePageState extends State<MyHomePage> {
         createdAt: DateTime.now().millisecondsSinceEpoch,
       );
       addMessage(textMessage);
+      final response = await http.post(
+          Uri.parse(
+              "http://192.168.223.9:3000/submit"), // indirizzo del server da cambiare
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(textMessage));
+      _showAlert(jsonDecode(response.body)['text']);
     } else {
       _showAlert("Message cannot be empty"); // Alert for empty messages
     }
