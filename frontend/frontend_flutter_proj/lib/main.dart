@@ -1,47 +1,41 @@
+// ignore_for_file: unused_local_variable, no_leading_underscores_for_local_identifiers
+
 import 'dart:convert';
-import 'package:quickalert/quickalert.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:flutter_chat_ui/flutter_chat_ui.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
+import 'package:quickalert/quickalert.dart';
 
 void main() {
-  runApp(const MyApp());
+  //runApp(const MyApp());
+  initializeDateFormatting().then((_) => runApp(const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Flutter Test',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.black),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Chat'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
+
   final String title;
 
   @override
@@ -49,116 +43,166 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final TextEditingController controllerSocket = TextEditingController();
-  final TextEditingController controllerMessaggio = TextEditingController();
-  final TextEditingController controllerRispostaServer =
-      TextEditingController();
+  List<types.Message> messages = [];
 
-  final user = ['bfb6f760-bfdf-418f-8350-26031128e34e', 'Diego', 'Vagnini'];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMessage();
+  }
+
+  final _user = types.User(
+    id: 'bfb6f760-bfdf-418f-8350-26031128e34e',
+    firstName: "Diego",
+    lastName: "Vagnini",
+  );
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-          child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: 250,
-            height: 70,
-            child: TextField(
-              controller: controllerSocket,
-              decoration: const InputDecoration(
-                  border: OutlineInputBorder(), labelText: 'Socket del Server'),
+        appBar: AppBar(
+          title: const Text("GagioX Chat"),
+          backgroundColor: const Color.fromARGB(255, 57, 21, 118),
+          foregroundColor: Colors.white,
+        ),
+        body: Chat(
+          messages: messages, //abbiniamo il widget con i messaggi
+          onPreviewDataFetched: _handlePreviewDatafetched,
+          onSendPressed: _handleSendPressed,
+          showUserAvatars: true,
+          showUserNames: true,
+
+          user: _user,
+          theme: const DarkChatTheme(
+            backgroundColor: Colors.black,
+            seenIcon: Text(
+              "read",
+              style: TextStyle(fontSize: 10),
             ),
           ),
-          SizedBox(
-            width: 250,
-            height: 60,
-            child: TextField(
-              controller: controllerMessaggio,
-              decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Testo da inviare al server'),
-            ),
-          ),
-          ElevatedButton(onPressed: InvioJson, child: const Text('Invia Json')),
-          SizedBox(
-            width: 250,
-            height: 60,
-            child: TextField(
-              controller: controllerRispostaServer,
-              decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Risposta del server'),
-            ),
-          ),
-        ],
-      )),
-    );
+        ));
   }
 
-  void InvioJson() async {
-    //continuare con l'invio del JSON sul server
-    //_showAlertSuccess(controllerSocket.text);
+  void loadStatic() async {
+    final response = await rootBundle.loadString(
+        "assets/messaggi.json"); //Prendiamo il contenuto del file json dentro la stringa
+    //final List<Message> dynJson = await readJsonDy();
+    final _messages = (jsonDecode(response)
+            as List) // Lo deserializziamo in List di string
+        .map((e) => types.Message.fromJson(e as Map<
+            String, //Qua devo caricare il json statico e dinamico
+            dynamic>)) //mappiamo  ogni elemento della lista in un oggetto Message
+        .toList(); //Lo convertiamo in una lista di oggetti
 
-    final Message = {
-      'author': {
-        'firstName': user[0],
-        'lastName': user[1],
-        'id': user[2],
-      },
-      'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
-      'id': Uuid().v4(),
-      'text': controllerMessaggio.text,
-      'type': 'text',
-      'timestamp': DateTime.now().toIso8601String(),
-    };
+    setState(() {
+      messages = _messages;
+      //_showAlert(messages.toString());
+      messages.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
+    });
+  }
 
-    final response = await http.post(
-        Uri.parse(
-            "http://${controllerSocket.text}/submit"), // indirizzo del server da cambiare
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(Message));
+  void _loadMessage() async {
+    // final String path = await GetPath();
+    // final File file = File(path);
+    List<types.Message> ExistingText = [];
 
-    if (response.statusCode == 200) {
-      final responseData = jsonDecode(response.body);
-      final risposta = responseData['message'];
-      //_showAlertSuccess(risposta);
-      setState(() {
-        controllerRispostaServer.text = risposta;
-        controllerMessaggio.text = "";
-        controllerSocket.text = '';
-      });
+    try {
+      try {
+        ExistingText = await JsonReading();
+        //loadStatic();
+        setState(() {
+          messages += ExistingText;
+          messages.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
+        });
+      } catch (e) {
+        //loadStatic();
+      }
+    } catch (e) {
+      _showAlert("Error loading messages: $e");
     }
   }
 
-  void _showAlertSuccess(String s) {
-    QuickAlert.show(
-        context: context,
-        type: QuickAlertType.success,
-        text: s,
-        title: 'Successo');
+  void _handlePreviewDatafetched(types.TextMessage p1, types.PreviewData p2) {
+    final int index =
+        messages.indexWhere((types.Message element) => element.id == p1.id);
+    final types.Message updatedMessage =
+        (messages[index] as types.TextMessage).copyWith(previewData: p2);
+    /*Questa funzione recupera i messaggi contenuti nei messaggi.json e li mette sul body della mia
+    applicazione. In particola trova l’indice del messaggio nella lista _messaggi, ne crea una copia ed
+    aggiorna la lista*/
   }
 
-  void _showAlertError(String s) {
-    QuickAlert.show(
-        context: context, type: QuickAlertType.error, text: s, title: 'Errore');
+  void _handleSendPressed(types.PartialText p1) {
+    if (p1.text.isNotEmpty) {
+      // Check if the message text is not empty
+      final types.TextMessage textMessage = types.TextMessage(
+        author: _user,
+        id: const Uuid().v4(),
+        text: p1.text,
+        createdAt: DateTime.now().millisecondsSinceEpoch,
+      );
+      addMessage(textMessage);
+    } else {
+      _showAlert("Message cannot be empty"); // Alert for empty messages
+    }
+  }
+
+  Future<String> GetPath() async {
+    final dir = await getApplicationCacheDirectory();
+    return '${dir.path}/MessaggiDinamici8.json';
+  }
+
+  void addMessage(types.TextMessage message) async {
+    final String path = await GetPath();
+    final File file = File(path);
+
+    try {
+      List<types.TextMessage> existingMessages = [];
+      if (await file.exists()) {
+        String jsonContent = await file.readAsString();
+        if (jsonContent.isNotEmpty) {
+          existingMessages = (jsonDecode(jsonContent) as List)
+              .map((e) => types.TextMessage.fromJson(e as Map<String, dynamic>))
+              .toList();
+        }
+      }
+
+      existingMessages.add(message); // Aggiungi il nuovo messaggio
+      String newJsonContent =
+          jsonEncode(existingMessages); // Serializza l'intero array
+      await file.writeAsString(newJsonContent); // Scrivi tutto nel file
+    } catch (e) {
+      _showAlert("Error writing message: $e");
+    }
+
+    setState(() {
+      messages.add(message);
+      messages.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
+    });
+
+    initState();
+  }
+
+  Future<List<types.Message>> JsonReading() async {
+    final String path = await GetPath();
+    final File file = File(path);
+    List<types.Message> messagesJson = [];
+    if (await file.exists()) {
+      String jsonContent = await file.readAsString();
+      if (jsonContent.isNotEmpty) {
+        messagesJson = (jsonDecode(jsonContent) as List)
+            .cast()
+            .map((e) => types.Message.fromJson(e as Map<String, dynamic>))
+            .toList();
+        return messagesJson;
+      }
+    }
+    messagesJson = [];
+    return messagesJson;
+  }
+
+  void _showAlert(String string) {
+    QuickAlert.show(context: context, type: QuickAlertType.info, text: string);
   }
 }
