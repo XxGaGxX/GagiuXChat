@@ -51,6 +51,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController controllerSocket = TextEditingController();
   final TextEditingController controllerMessaggio = TextEditingController();
+  final TextEditingController controllerRispostaServer =
+      TextEditingController();
 
   final user = ['bfb6f760-bfdf-418f-8350-26031128e34e', 'Diego', 'Vagnini'];
 
@@ -62,6 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
+
     return Scaffold(
       appBar: AppBar(
         // TRY THIS: Try changing the color here to a specific color (to
@@ -95,7 +98,17 @@ class _MyHomePageState extends State<MyHomePage> {
                   labelText: 'Testo da inviare al server'),
             ),
           ),
-          ElevatedButton(onPressed: InvioJson, child: const Text('Invia Json'))
+          ElevatedButton(onPressed: InvioJson, child: const Text('Invia Json')),
+          SizedBox(
+            width: 250,
+            height: 60,
+            child: TextField(
+              controller: controllerRispostaServer,
+              decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Risposta del server'),
+            ),
+          ),
         ],
       )),
     );
@@ -103,6 +116,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void InvioJson() async {
     //continuare con l'invio del JSON sul server
+    //_showAlertSuccess(controllerSocket.text);
+
     final Message = {
       'author': {
         'firstName': user[0],
@@ -116,19 +131,21 @@ class _MyHomePageState extends State<MyHomePage> {
       'timestamp': DateTime.now().toIso8601String(),
     };
 
-    final response = await http.post(Uri.parse('http://10.0.2.2:3000/'), // indirizzo del server da cambiare
+    final response = await http.post(
+        Uri.parse(
+            "http://${controllerSocket.text}/submit"), // indirizzo del server da cambiare
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(Message));
 
-    switch (response.statusCode) {
-      case 200:
-        if (mounted) {
-          //_showAlertSuccess('Messaggio inviato al server con successo');
-          controllerMessaggio.text = 'Messaggio inviato con successo';
-        }
-        break;
-      case 400:
-        controllerMessaggio.text = 'Messaggio non inviato al server';
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(response.body);
+      final risposta = responseData['message'];
+      //_showAlertSuccess(risposta);
+      setState(() {
+        controllerRispostaServer.text = risposta;
+        controllerMessaggio.text = "";
+        controllerSocket.text = '';
+      });
     }
   }
 
