@@ -1,5 +1,6 @@
 // ignore_for_file: unused_local_variable, no_leading_underscores_for_local_identifiers
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:quickalert/quickalert.dart';
 
 void main() {
@@ -49,6 +51,26 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     _loadMessage();
+
+    socket = IO.io('http://192.168.101.9:4500', <String, dynamic>{
+      "transports": ["websocket"]
+    });
+
+    socket.on("connect", (_) {
+      setState(() {
+        _showAlert("Client connesso al server");
+      });
+    });
+
+    socket.on("message", (data) {
+      _streamController.add(data);
+    });
+
+    @override
+    void Dispose() {
+      _streamController.close();
+      super.dispose();
+    }
   }
 
   final _user = types.User(
@@ -56,6 +78,9 @@ class _MyHomePageState extends State<MyHomePage> {
     firstName: "Diego",
     lastName: "Vagnini",
   );
+
+  late IO.Socket socket;
+  final StreamController<String> _streamController = StreamController<String>();
 
   @override
   Widget build(BuildContext context) {
@@ -141,13 +166,16 @@ class _MyHomePageState extends State<MyHomePage> {
         text: p1.text,
         createdAt: DateTime.now().millisecondsSinceEpoch,
       );
+      // addMessage(textMessage);
+      // final response = await http.post(
+      //     Uri.parse(
+      //         "http://192.168.223.9:3000/submit"), // indirizzo del server da cambiare
+      //     headers: {'Content-Type': 'application/json'},
+      //     body: jsonEncode(textMessage));
+      // _showAlert(jsonDecode(response.body)['text']);
+
+      socket.emit('sendMessage', textMessage);
       addMessage(textMessage);
-      final response = await http.post(
-          Uri.parse(
-              "http://192.168.223.9:3000/submit"), // indirizzo del server da cambiare
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode(textMessage));
-      _showAlert(jsonDecode(response.body)['text']);
     } else {
       _showAlert("Message cannot be empty"); // Alert for empty messages
     }
