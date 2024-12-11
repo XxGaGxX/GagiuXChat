@@ -52,18 +52,16 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     _loadMessage();
 
-    socket = IO.io('http://192.168.101.9:4500', <String, dynamic>{
+    socket = IO.io('http://192.168.101.9:5000', <String, dynamic>{
       "transports": ["websocket"]
     });
 
-    socket.on("connect", (_) {
-      setState(() {
-        _showAlert("Client connesso al server");
-      });
-    });
+    socket.on("connect", (_) {});
 
-    socket.on("message", (data) {
-      _streamController.add(data);
+    socket.on("messageServer", (data) {
+      setState(() {
+        addMessage(data);
+      });
     });
 
     @override
@@ -96,7 +94,6 @@ class _MyHomePageState extends State<MyHomePage> {
           onSendPressed: _handleSendPressed,
           showUserAvatars: true,
           showUserNames: true,
-
           user: _user,
           theme: const DarkChatTheme(
             backgroundColor: Colors.black,
@@ -166,6 +163,8 @@ class _MyHomePageState extends State<MyHomePage> {
         text: p1.text,
         createdAt: DateTime.now().millisecondsSinceEpoch,
       );
+      //_showAlert(textMessage.toString());
+
       // addMessage(textMessage);
       // final response = await http.post(
       //     Uri.parse(
@@ -174,8 +173,8 @@ class _MyHomePageState extends State<MyHomePage> {
       //     body: jsonEncode(textMessage));
       // _showAlert(jsonDecode(response.body)['text']);
 
-      socket.emit('sendMessage', textMessage);
       addMessage(textMessage);
+      socket.emit('sendMessage', textMessage);
     } else {
       _showAlert("Message cannot be empty"); // Alert for empty messages
     }
@@ -183,7 +182,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<String> GetPath() async {
     final dir = await getApplicationCacheDirectory();
-    return '${dir.path}/MessaggiDinamici8.json';
+    return '${dir.path}/MessaggiDinamici9.json';
   }
 
   void addMessage(types.TextMessage message) async {

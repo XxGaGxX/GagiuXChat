@@ -1,5 +1,6 @@
 const express = require("express");
 const http = require("http");
+const { stringify } = require("querystring");
 const socketIo = require("socket.io");
 
 const app = express();
@@ -15,15 +16,16 @@ io.on("connection", (socket) => {
 
   socket.on("sendMessage", (data) => {
     console.log(data);
-    io.emit("message", data); // Send message to all connected clients
+    console.log("Emit: messageServer " + stringify(data))
+    io.emit("messageServer", data) // Send message to all connected clients
   });
 
-  socket.on("disconnection", () => {
+  socket.on("disconnect", () => {
     console.log("client disconnesso");
   });
 });
 
-const PORT = process.env.PORT || 4500;
+const PORT = process.env.PORT || 5000;
 server.listen(PORT, "192.168.101.9", () => {
   console.log("Server in ascolto alla porta: " + PORT);
 });
