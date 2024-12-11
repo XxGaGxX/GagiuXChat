@@ -1,7 +1,10 @@
+const { text } = require("body-parser");
 const express = require("express");
 const http = require("http");
 const { stringify } = require("querystring");
 const socketIo = require("socket.io");
+import { v4 as uuidv4 } from "uuid";
+
 
 const app = express();
 const server = http.createServer(app);
@@ -16,8 +19,17 @@ io.on("connection", (socket) => {
 
   socket.on("sendMessage", (data) => {
     console.log(data);
-    console.log("Emit: messageServer " + stringify(data))
-    io.emit("messageServer", data) // Send message to all connected clients
+    var messaggio = {
+      author: {
+        firstName: 'Server', 
+        lastName: 'test',
+        id : '656e2427-991f-4cc4-bb52-406e0b98bd4b'
+      },
+      text: data.text,
+      id: uuidv4,
+      createdAt: Date.now()
+    }
+    io.emit("messageServer", messaggio) // Send message to all connected clients
   });
 
   socket.on("disconnect", () => {

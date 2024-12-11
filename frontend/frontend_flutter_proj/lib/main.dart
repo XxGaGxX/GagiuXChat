@@ -71,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  final _user = types.User(
+  final _user = const types.User(
     id: 'bfb6f760-bfdf-418f-8350-26031128e34e',
     firstName: "Diego",
     lastName: "Vagnini",
@@ -164,15 +164,6 @@ class _MyHomePageState extends State<MyHomePage> {
         createdAt: DateTime.now().millisecondsSinceEpoch,
       );
       //_showAlert(textMessage.toString());
-
-      // addMessage(textMessage);
-      // final response = await http.post(
-      //     Uri.parse(
-      //         "http://192.168.223.9:3000/submit"), // indirizzo del server da cambiare
-      //     headers: {'Content-Type': 'application/json'},
-      //     body: jsonEncode(textMessage));
-      // _showAlert(jsonDecode(response.body)['text']);
-
       addMessage(textMessage);
       socket.emit('sendMessage', textMessage);
     } else {
