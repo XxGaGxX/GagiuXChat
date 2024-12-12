@@ -13,6 +13,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:quickalert/quickalert.dart';
+import 'package:restart_app/restart_app.dart';
 
 void main() {
   //runApp(const MyApp());
@@ -72,11 +73,21 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  // diego
+
   final _user = const types.User(
     id: 'bfb6f760-bfdf-418f-8350-26031128e34e',
     firstName: "Diego",
     lastName: "Vagnini",
   );
+
+
+  //babbo
+  // final _user = const types.User(
+  //   id: 'd74db2c2-32b0-4f56-88a2-041eaab1fc1b',
+  //   firstName: "Daniele",
+  //   lastName: "Vagnini",
+  // );
 
   late IO.Socket socket;
   final StreamController<String> _streamController = StreamController<String>();
@@ -144,6 +155,13 @@ class _MyHomePageState extends State<MyHomePage> {
     addMessage(messaggioNuovo);
   }
 
+  void DeleteJson() async {
+    final String path = await GetPath();
+    final File file = File(path);
+
+    file.delete();
+  }
+
   void _handlePreviewDatafetched(types.TextMessage p1, types.PreviewData p2) {
     final int index =
         messages.indexWhere((types.Message element) => element.id == p1.id);
@@ -180,7 +198,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _handleSendPressed(types.PartialText p1) async {
     if (p1.text.isNotEmpty) {
-      // Check if the message text is not empty
       final types.TextMessage textMessage = types.TextMessage(
         author: _user,
         id: const Uuid().v4(),
@@ -189,11 +206,17 @@ class _MyHomePageState extends State<MyHomePage> {
       );
       //_showAlert(textMessage.toString());
 
-      addMessage(textMessage);
+      if (textMessage.text == '/delete') {
+        DeleteJson();
+        sleep(const Duration(milliseconds: 500));
+        Restart.restartApp();
+      } else {
+        addMessage(textMessage);
 
-      socket.emit('sendMessage', textMessage);
+        socket.emit('sendMessage', textMessage);
+      }
     } else {
-      _showAlert("Message cannot be empty"); // Alert for empty messages
+      _showAlert("Message cannot be empty");
     }
   }
 
@@ -209,7 +232,6 @@ class _MyHomePageState extends State<MyHomePage> {
       messages.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
     });
   }
-
 
   Future<List<types.Message>> JsonReading() async {
     final String path = await GetPath();

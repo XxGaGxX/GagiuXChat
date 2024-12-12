@@ -17,6 +17,7 @@ const io = socketIo(server, {
 
 io.on("connection", (socket) => {
   console.log("Client connesso");
+  socket.join('room');
 
   socket.on("sendMessage", (data) => {
     console.log(data);
@@ -26,9 +27,9 @@ io.on("connection", (socket) => {
 
     var messaggio = {
       author: {
-        firstName: "Server",
-        lastName: "test",
-        id: "656e2427-991f-4cc4-bb52-406e0b98bd4b",
+        firstName: data.author.firstName,
+        lastName: data.author.lastName,
+        id: data.author.id,
       },
       text: data.text,
       id: uuidv4(),
@@ -37,7 +38,7 @@ io.on("connection", (socket) => {
 
     messaggio = JSON.stringify(messaggio);
 
-    io.emit("messageServer", messaggio) // Send message to all connected clients
+    socket.to('room').emit("messageServer", messaggio) // Send message to all connected clients
   });
 
   socket.on("disconnect", () => {
