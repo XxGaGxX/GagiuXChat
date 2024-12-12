@@ -52,7 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     _loadMessage();
 
-    socket = IO.io('http://192.168.160.1:5000', <String, dynamic>{
+    socket = IO.io('http://192.168.1.118:5000', <String, dynamic>{
       "transports": ["websocket"]
     });
 
@@ -60,13 +60,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
     socket.on("messageServer", (data) {
       setState(() {
-        addMessage(data);
+        messageFromServer(data);
       });
     });
 
     @override
-    void Dispose() {
+    void dispose() {
       _streamController.close();
+      socket.dispose();
       super.dispose();
     }
   }
@@ -105,24 +106,6 @@ class _MyHomePageState extends State<MyHomePage> {
         ));
   }
 
-  void loadStatic() async {
-    final response = await rootBundle.loadString(
-        "assets/messaggi.json"); //Prendiamo il contenuto del file json dentro la stringa
-    //final List<Message> dynJson = await readJsonDy();
-    final _messages = (jsonDecode(response)
-            as List) // Lo deserializziamo in List di string
-        .map((e) => types.Message.fromJson(e as Map<
-            String, //Qua devo caricare il json statico e dinamico
-            dynamic>)) //mappiamo  ogni elemento della lista in un oggetto Message
-        .toList(); //Lo convertiamo in una lista di oggetti
-
-    setState(() {
-      messages = _messages;
-      //_showAlert(messages.toString());
-      messages.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
-    });
-  }
-
   void _loadMessage() async {
     // final String path = await GetPath();
     // final File file = File(path);
@@ -144,6 +127,23 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  void messageFromServer(dynamic messaggio) {
+    final bodyJson = json.decode(messaggio);
+
+    final user = types.User(id: bodyJson['id']);
+
+    final types.TextMessage messaggioNuovo = types.TextMessage(
+        author: types.User(
+            id: bodyJson['author']['id'],
+            firstName: bodyJson['author']['firstName'],
+            lastName: bodyJson['author']['lastName']),
+        text: bodyJson['text'],
+        id: bodyJson['id'],
+        createdAt: DateTime.now().millisecondsSinceEpoch);
+
+    addMessage(messaggioNuovo);
+  }
+
   void _handlePreviewDatafetched(types.TextMessage p1, types.PreviewData p2) {
     final int index =
         messages.indexWhere((types.Message element) => element.id == p1.id);
@@ -154,29 +154,7 @@ class _MyHomePageState extends State<MyHomePage> {
     aggiorna la lista*/
   }
 
-  void _handleSendPressed(types.PartialText p1) async {
-    if (p1.text.isNotEmpty) {
-      // Check if the message text is not empty
-      final types.TextMessage textMessage = types.TextMessage(
-        author: _user,
-        id: const Uuid().v4(),
-        text: p1.text,
-        createdAt: DateTime.now().millisecondsSinceEpoch,
-      );
-      //_showAlert(textMessage.toString());
-      addMessage(textMessage);
-      socket.emit('sendMessage', textMessage);
-    } else {
-      _showAlert("Message cannot be empty"); // Alert for empty messages
-    }
-  }
-
-  Future<String> GetPath() async {
-    final dir = await getApplicationCacheDirectory();
-    return '${dir.path}/MessaggiDinamici9.json';
-  }
-
-  void addMessage(types.TextMessage message) async {
+  void AggiungiAlJson(types.TextMessage message) async {
     final String path = await GetPath();
     final File file = File(path);
 
@@ -198,14 +176,40 @@ class _MyHomePageState extends State<MyHomePage> {
     } catch (e) {
       _showAlert("Error writing message: $e");
     }
+  }
 
+  void _handleSendPressed(types.PartialText p1) async {
+    if (p1.text.isNotEmpty) {
+      // Check if the message text is not empty
+      final types.TextMessage textMessage = types.TextMessage(
+        author: _user,
+        id: const Uuid().v4(),
+        text: p1.text,
+        createdAt: DateTime.now().millisecondsSinceEpoch,
+      );
+      //_showAlert(textMessage.toString());
+
+      addMessage(textMessage);
+
+      socket.emit('sendMessage', textMessage);
+    } else {
+      _showAlert("Message cannot be empty"); // Alert for empty messages
+    }
+  }
+
+  Future<String> GetPath() async {
+    final dir = await getApplicationCacheDirectory();
+    return '${dir.path}/MessaggiDinamici11.json';
+  }
+
+  void addMessage(types.TextMessage message) async {
+    AggiungiAlJson(message);
     setState(() {
       messages.add(message);
       messages.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
     });
-
-    initState();
   }
+
 
   Future<List<types.Message>> JsonReading() async {
     final String path = await GetPath();

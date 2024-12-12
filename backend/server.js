@@ -1,9 +1,10 @@
-const { text } = require("body-parser");
+const { text, json } = require("body-parser");
 const express = require("express");
 const http = require("http");
 const { stringify } = require("querystring");
 const socketIo = require("socket.io");
-import { v4 as uuidv4 } from "uuid";
+const { v4: uuidv4 } = require("uuid");
+const { execSync } = require('child_process');
 
 
 const app = express();
@@ -19,16 +20,23 @@ io.on("connection", (socket) => {
 
   socket.on("sendMessage", (data) => {
     console.log(data);
+    //console.log("messagio inviato :" + messaggio);
+    
+    execSync("sleep 1");
+
     var messaggio = {
       author: {
-        firstName: 'Server', 
-        lastName: 'test',
-        id : '656e2427-991f-4cc4-bb52-406e0b98bd4b'
+        firstName: "Server",
+        lastName: "test",
+        id: "656e2427-991f-4cc4-bb52-406e0b98bd4b",
       },
       text: data.text,
-      id: uuidv4,
-      createdAt: Date.now()
-    }
+      id: uuidv4(),
+      createdAt: Date.now(),
+    };
+
+    messaggio = JSON.stringify(messaggio);
+
     io.emit("messageServer", messaggio) // Send message to all connected clients
   });
 
@@ -38,6 +46,6 @@ io.on("connection", (socket) => {
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, "192.168.160.1", () => {
+server.listen(PORT, "192.168.1.118", () => {
   console.log("Server in ascolto alla porta: " + PORT);
 });
