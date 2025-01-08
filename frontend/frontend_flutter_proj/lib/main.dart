@@ -7,8 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:flutter/services.dart' show rootBundle;
-import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -53,7 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     _loadMessage();
 
-    socket = IO.io('http://192.168.1.118:5000', <String, dynamic>{
+    socket = IO.io('http://10.1.0.9:5000', <String, dynamic>{
       "transports": ["websocket"]
     });
 
@@ -197,6 +195,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _handleSendPressed(types.PartialText p1) async {
+    String room = "";
+    
     if (p1.text.isNotEmpty) {
       final types.TextMessage textMessage = types.TextMessage(
         author: _user,
@@ -206,15 +206,22 @@ class _MyHomePageState extends State<MyHomePage> {
       );
       //_showAlert(textMessage.toString());
 
-      if (textMessage.text == '/delete') {
-        DeleteJson();
-        sleep(const Duration(milliseconds: 500));
-        Restart.restartApp();
-      } else {
-        addMessage(textMessage);
+      
 
-        socket.emit('sendMessage', textMessage);
+      switch(textMessage.text){
+        case "/delete":
+          DeleteJson();
+          sleep(const Duration(milliseconds: 500));
+          Restart.restartApp();
+          break;
+        default :
+          addMessage(textMessage);
+          socket.emit('sendMessage', textMessage);
+          break;
       }
+
+
+
     } else {
       _showAlert("Message cannot be empty");
     }

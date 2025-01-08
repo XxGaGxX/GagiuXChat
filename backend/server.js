@@ -17,13 +17,17 @@ const io = socketIo(server, {
 
 io.on("connection", (socket) => {
   console.log("Client connesso");
-  socket.join('room');
+  socket.on("join", function(room){
+    if(socket.adapter.rooms["room"]){
+      socket.join(room);
+      console.log("Hai joinato la room : " + room )
+    }
+  })
 
   socket.on("sendMessage", (data) => {
     console.log(data);
     //console.log("messagio inviato :" + messaggio);
-    
-    execSync("sleep 1");
+
 
     var messaggio = {
       author: {
@@ -38,7 +42,7 @@ io.on("connection", (socket) => {
 
     messaggio = JSON.stringify(messaggio);
 
-    socket.to('room').emit("messageServer", messaggio) // Send message to all connected clients
+    socket.to('room').emit("messageServer", messaggio["text"]) // Send message to all connected clients
   });
 
   socket.on("disconnect", () => {
@@ -47,6 +51,6 @@ io.on("connection", (socket) => {
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, "192.168.1.118", () => {
+server.listen(PORT, "10.1.0.9", () => {
   console.log("Server in ascolto alla porta: " + PORT);
 });
