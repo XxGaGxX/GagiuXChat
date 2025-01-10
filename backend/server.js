@@ -6,7 +6,7 @@ const socketIo = require("socket.io");
 const { v4: uuidv4 } = require("uuid");
 const { execSync } = require('child_process');
 
-
+let roomID = 'default';
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
@@ -17,15 +17,15 @@ const io = socketIo(server, {
 
 io.on("connection", (socket) => {
   console.log("Client connesso");
-  socket.on("join", function(room){
-    if(socket.adapter.rooms["room"]){
-      socket.join(room);
-      console.log("Hai joinato la room : " + room )
-    }
+  socket.on("join", (room) => {
+    roomID = room
+    socket.join(room)
+    console.log(`Client joined room ${room}`)
   })
 
+ 
   socket.on("sendMessage", (data) => {
-    console.log(data);
+    console.log(data.text);
     //console.log("messagio inviato :" + messaggio);
 
 
@@ -42,7 +42,7 @@ io.on("connection", (socket) => {
 
     messaggio = JSON.stringify(messaggio);
 
-    socket.to('room').emit("messageServer", messaggio["text"]) // Send message to all connected clients
+    socket.to(roomID).emit("messageServer", messaggio["text"]) // Send message to all connected clients
   });
 
   socket.on("disconnect", () => {
@@ -51,6 +51,6 @@ io.on("connection", (socket) => {
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, "10.1.0.9", () => {
+server.listen(PORT, "192.168.1.118", () => {
   console.log("Server in ascolto alla porta: " + PORT);
 });

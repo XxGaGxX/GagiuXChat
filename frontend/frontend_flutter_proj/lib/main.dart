@@ -51,7 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     _loadMessage();
 
-    socket = IO.io('http://10.1.0.9:5000', <String, dynamic>{
+    socket = IO.io('http://192.168.1.118:5000', <String, dynamic>{
       "transports": ["websocket"]
     });
 
@@ -78,7 +78,6 @@ class _MyHomePageState extends State<MyHomePage> {
     firstName: "Diego",
     lastName: "Vagnini",
   );
-
 
   //babbo
   // final _user = const types.User(
@@ -196,7 +195,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _handleSendPressed(types.PartialText p1) async {
     String room = "";
-    
+
     if (p1.text.isNotEmpty) {
       final types.TextMessage textMessage = types.TextMessage(
         author: _user,
@@ -206,21 +205,21 @@ class _MyHomePageState extends State<MyHomePage> {
       );
       //_showAlert(textMessage.toString());
 
-      
-
-      switch(textMessage.text){
+      switch (textMessage.text) {
         case "/delete":
           DeleteJson();
           sleep(const Duration(milliseconds: 500));
           Restart.restartApp();
           break;
-        default :
+        default:
           addMessage(textMessage);
           socket.emit('sendMessage', textMessage);
           break;
       }
 
-
+      if (textMessage.text.contains('/join')) {
+        socket.emit('join', textMessage.text.substring(6));
+      }
 
     } else {
       _showAlert("Message cannot be empty");
