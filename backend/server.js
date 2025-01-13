@@ -1,12 +1,8 @@
-const { text, json } = require("body-parser");
 const express = require("express");
 const http = require("http");
-const { stringify } = require("querystring");
 const socketIo = require("socket.io");
 const { v4: uuidv4 } = require("uuid");
-const { execSync } = require('child_process');
 
-let roomID = 'default';
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
@@ -17,19 +13,16 @@ const io = socketIo(server, {
 
 io.on("connection", (socket) => {
   console.log("Client connesso");
+
   socket.on("join", (room) => {
-    roomID = room
-    socket.join(room)
-    console.log(`Client joined room ${room}`)
-  })
+    if (!socket.rooms.has(room)) {
+      socket.join(room);
+      console.log(`Client joined room ${room}`);
+    }
+  });
 
- 
   socket.on("sendMessage", (data) => {
-    console.log(data.text);
-    //console.log("messagio inviato :" + messaggio);
-
-
-    var messaggio = {
+    const messaggio = {
       author: {
         firstName: data.author.firstName,
         lastName: data.author.lastName,
@@ -38,11 +31,13 @@ io.on("connection", (socket) => {
       text: data.text,
       id: uuidv4(),
       createdAt: Date.now(),
+      roomId: data.roomId,
     };
 
-    messaggio = JSON.stringify(messaggio);
+    const messaggio1 = JSON.stringify(messaggio);
+    console.log(messaggio1);
 
-    socket.to(roomID).emit("messageServer", messaggio["text"]) // Send message to all connected clients
+    socket.to(data.roomId).emit("messageServer", messaggio1);
   });
 
   socket.on("disconnect", () => {

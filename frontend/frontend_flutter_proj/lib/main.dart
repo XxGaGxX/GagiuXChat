@@ -58,9 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
     socket.on("connect", (_) {});
 
     socket.on("messageServer", (data) {
-      setState(() {
-        messageFromServer(data);
-      });
+      messageFromServer(data);
     });
 
     @override
@@ -71,21 +69,25 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  // diego
-
-  final _user = const types.User(
-    id: 'bfb6f760-bfdf-418f-8350-26031128e34e',
-    firstName: "Diego",
-    lastName: "Vagnini",
-  );
-
-  //babbo
   // final _user = const types.User(
-  //   id: 'd74db2c2-32b0-4f56-88a2-041eaab1fc1b',
-  //   firstName: "Daniele",
+  //   id: 'bfb6f760-bfdf-418f-8350-26031128e34e',
+  //   firstName: "Diego",
   //   lastName: "Vagnini",
   // );
 
+  final _user = const types.User(
+    id: 'd74db2c2-32b0-4f56-88a2-041eaab1fc1b',
+    firstName: "Daniele",
+    lastName: "Vagnini",
+  );
+
+  // final _user = const types.User(
+  //   id: '2bc762e2-1ed5-4aec-951a-09f1d0bc6610',
+  //   firstName: "Denis",
+  //   lastName: "Vagnini",
+  // );
+
+  String room = 'room';
   late IO.Socket socket;
   final StreamController<String> _streamController = StreamController<String>();
 
@@ -147,7 +149,8 @@ class _MyHomePageState extends State<MyHomePage> {
             lastName: bodyJson['author']['lastName']),
         text: bodyJson['text'],
         id: bodyJson['id'],
-        createdAt: DateTime.now().millisecondsSinceEpoch);
+        createdAt: DateTime.now().millisecondsSinceEpoch,
+        roomId: bodyJson['roomId']);
 
     addMessage(messaggioNuovo);
   }
@@ -194,36 +197,40 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _handleSendPressed(types.PartialText p1) async {
-    String room = "";
-
     if (p1.text.isNotEmpty) {
-      final types.TextMessage textMessage = types.TextMessage(
+      if (p1.text.contains('/join')) {
+        socket.emit('join', p1.text.substring(6));
+        setState(() {
+          room = p1.text.substring(6);
+        });
+      } else {
+        switch (p1.text) {
+          case "/delete":
+            DeleteJson();
+            sleep(const Duration(milliseconds: 500));
+            Restart.restartApp();
+
+            break;
+          default:
+            types.TextMessage text = _createTextMessage(p1);
+            addMessage(text);
+            socket.emit('sendMessage', text);
+            break;
+        }
+      }
+    } else {
+      _showAlert("Message cannot be empty");
+    }
+  }
+
+  types.TextMessage _createTextMessage(types.PartialText p1) {
+    final types.TextMessage textMessage = types.TextMessage(
         author: _user,
         id: const Uuid().v4(),
         text: p1.text,
         createdAt: DateTime.now().millisecondsSinceEpoch,
-      );
-      //_showAlert(textMessage.toString());
-
-      switch (textMessage.text) {
-        case "/delete":
-          DeleteJson();
-          sleep(const Duration(milliseconds: 500));
-          Restart.restartApp();
-          break;
-        default:
-          addMessage(textMessage);
-          socket.emit('sendMessage', textMessage);
-          break;
-      }
-
-      if (textMessage.text.contains('/join')) {
-        socket.emit('join', textMessage.text.substring(6));
-      }
-
-    } else {
-      _showAlert("Message cannot be empty");
-    }
+        roomId: room);
+    return textMessage;
   }
 
   Future<String> GetPath() async {
