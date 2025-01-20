@@ -15,6 +15,7 @@ io.on("connection", (socket) => {
   console.log("Client connesso");
 
   socket.on("join", (room) => {
+    socket.join('room')
     if (!socket.rooms.has(room)) {
       socket.join(room);
       console.log(`Client joined room ${room}`);
