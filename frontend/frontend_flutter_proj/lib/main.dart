@@ -6,14 +6,22 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
+import 'package:frontend_flutter_proj/firebase_options.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:sign_in_button/sign_in_button.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:uuid/uuid.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:quickalert/quickalert.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:restart_app/restart_app.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   //runApp(const MyApp());
   initializeDateFormatting().then((_) => runApp(const MyApp()));
 }
@@ -51,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     _loadMessage();
 
-    socket = IO.io('http://192.168.1.118:5000', <String, dynamic>{
+    socket = IO.io('http://192.168.85.9:5000', <String, dynamic>{
       "transports": ["websocket"]
     });
 
@@ -75,11 +83,11 @@ class _MyHomePageState extends State<MyHomePage> {
   //   lastName: "Vagnini",
   // );
 
-  final _user = const types.User(
-    id: 'd74db2c2-32b0-4f56-88a2-041eaab1fc1b',
-    firstName: "Daniele",
-    lastName: "Vagnini",
-  );
+  // final _user = const types.User(
+  //   id: 'd74db2c2-32b0-4f56-88a2-041eaab1fc1b',
+  //   firstName: "Daniele",
+  //   lastName: "Vagnini",
+  // );
 
   // final _user = const types.User(
   //   id: '2bc762e2-1ed5-4aec-951a-09f1d0bc6610',
@@ -90,6 +98,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String room = 'room';
   late IO.Socket socket;
   final StreamController<String> _streamController = StreamController<String>();
+  String? _nomeUtente, _email, _errore;
 
   @override
   Widget build(BuildContext context) {
@@ -205,7 +214,7 @@ class _MyHomePageState extends State<MyHomePage> {
         });
       } else {
         switch (p1.text) {
-          case "/delete":
+          case "/clear":
             DeleteJson();
             sleep(const Duration(milliseconds: 500));
             Restart.restartApp();
