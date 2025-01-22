@@ -17,6 +17,7 @@ import 'package:quickalert/quickalert.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:restart_app/restart_app.dart';
+import 'package:uuid/v4.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -59,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     _loadMessage();
 
-    socket = IO.io('http://192.168.85.9:5000', <String, dynamic>{
+    socket = IO.io('http://192.168.1.118:5000', <String, dynamic>{
       "transports": ["websocket"]
     });
 
@@ -89,40 +90,61 @@ class _MyHomePageState extends State<MyHomePage> {
   //   lastName: "Vagnini",
   // );
 
-  // final _user = const types.User(
-  //   id: '2bc762e2-1ed5-4aec-951a-09f1d0bc6610',
-  //   firstName: "Denis",
-  //   lastName: "Vagnini",
-  // );
+  var _user = types.User(
+    id: '',
+    firstName: "",
+  );
 
   String room = 'room';
   late IO.Socket socket;
   final StreamController<String> _streamController = StreamController<String>();
-  String? _nomeUtente, _email, _errore;
+  String? _nomeUtente, _id, _errore;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    if (_nomeUtente == null) {
+      return Scaffold(
         appBar: AppBar(
-          title: const Text("GagioX Chat"),
-          backgroundColor: const Color.fromARGB(255, 57, 21, 118),
-          foregroundColor: Colors.white,
+          title: Text(widget.title),
         ),
-        body: Chat(
-          messages: messages, //abbiniamo il widget con i messaggi
-          onPreviewDataFetched: _handlePreviewDatafetched,
-          onSendPressed: _handleSendPressed,
-          showUserAvatars: true,
-          showUserNames: true,
-          user: _user,
-          theme: const DarkChatTheme(
-            backgroundColor: Colors.black,
-            seenIcon: Text(
-              "read",
-              style: TextStyle(fontSize: 10),
-            ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              SignInButton(
+                Buttons.google,
+                onPressed: () {
+                  _login();
+                },
+              ),
+              Text(_errore ?? ''),
+            ],
           ),
-        ));
+        ),
+      );
+    } else {
+      return Scaffold(
+          appBar: AppBar(
+            title: const Text("GagioX Chat"),
+            backgroundColor: const Color.fromARGB(255, 57, 21, 118),
+            foregroundColor: Colors.white,
+          ),
+          body: Chat(
+            messages: messages, //abbiniamo il widget con i messaggi
+            onPreviewDataFetched: _handlePreviewDatafetched,
+            onSendPressed: _handleSendPressed,
+            showUserAvatars: true,
+            showUserNames: true,
+            user: _user,
+            theme: const DarkChatTheme(
+              backgroundColor: Colors.black,
+              seenIcon: Text(
+                "read",
+                style: TextStyle(fontSize: 10),
+              ),
+            ),
+          ));
+    }
   }
 
   void _loadMessage() async {
@@ -146,6 +168,46 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  Future<void> _login() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) {
+        return; // l'utente ha annullato il login
+      } else {
+        final GoogleSignInAuthentication googleAuth = await googleUser
+            .authentication; // ottengo i dati di autenticazione dall'account google
+        final AuthCredential credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        ); //creo delle credenziali per firebase con i dati di autenticazione dell'account google
+        UserCredential userCredential = await FirebaseAuth.instance
+            .signInWithCredential(
+                credential); // faccio il login su Firebase con le credenziali di google
+        User? user = userCredential.user;
+        if (user != null) {
+          setState(() {
+            _nomeUtente = user.displayName;
+            _id = user.uid;
+          });
+          CredenzialiUtente();
+        }
+      }
+    } catch (e) {
+      setState(() {
+        _errore = e.toString();
+      });
+    }
+  }
+
+  void CredenzialiUtente() async {
+    setState(() {
+      _user = types.User(
+        id: _id!,
+        firstName: _nomeUtente,
+      );
+    });
+  }
+
   void messageFromServer(dynamic messaggio) {
     final bodyJson = json.decode(messaggio);
 
@@ -165,7 +227,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void DeleteJson() async {
-    final String path = await GetPath();
+    final String path = await GetPathText();
     final File file = File(path);
 
     file.delete();
@@ -182,7 +244,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void AggiungiAlJson(types.TextMessage message) async {
-    final String path = await GetPath();
+    final String path = await GetPathText();
     final File file = File(path);
 
     try {
@@ -242,9 +304,14 @@ class _MyHomePageState extends State<MyHomePage> {
     return textMessage;
   }
 
-  Future<String> GetPath() async {
+  Future<String> GetPathText() async {
     final dir = await getApplicationCacheDirectory();
     return '${dir.path}/MessaggiDinamici11.json';
+  }
+
+  Future<String> GetPathUser() async {
+    final dir = await getApplicationCacheDirectory();
+    return '${dir.path}/user.json';
   }
 
   void addMessage(types.TextMessage message) async {
@@ -256,7 +323,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<List<types.Message>> JsonReading() async {
-    final String path = await GetPath();
+    final String path = await GetPathText();
     final File file = File(path);
     List<types.Message> messagesJson = [];
     if (await file.exists()) {

@@ -52,7 +52,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyAUDfxB1AEmkonK-gjFlLt6Vm_I8gzOyzY',
-    appId: '1:345328001724:android:e120fd549a2bf572fca6b9',
+    appId: '1:345328001724:android:88bbe6143a2640a8fca6b9',
     messagingSenderId: '345328001724',
     projectId: 'flutter-auth-4b5cd',
     storageBucket: 'flutter-auth-4b5cd.firebasestorage.app',
@@ -64,7 +64,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '345328001724',
     projectId: 'flutter-auth-4b5cd',
     storageBucket: 'flutter-auth-4b5cd.firebasestorage.app',
-    androidClientId: '345328001724-uk2clk61fhg2m4od1vkqvm84m230rh0c.apps.googleusercontent.com',
+    androidClientId: '345328001724-62u2ajfu24le8nutrf8tt2r51iccihed.apps.googleusercontent.com',
     iosClientId: '345328001724-sul37lps4eqkk8c5r2slmkot8lp4hb9g.apps.googleusercontent.com',
     iosBundleId: 'com.example.frontendFlutterProj',
   );
@@ -75,7 +75,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '345328001724',
     projectId: 'flutter-auth-4b5cd',
     storageBucket: 'flutter-auth-4b5cd.firebasestorage.app',
-    androidClientId: '345328001724-uk2clk61fhg2m4od1vkqvm84m230rh0c.apps.googleusercontent.com',
+    androidClientId: '345328001724-62u2ajfu24le8nutrf8tt2r51iccihed.apps.googleusercontent.com',
     iosClientId: '345328001724-sul37lps4eqkk8c5r2slmkot8lp4hb9g.apps.googleusercontent.com',
     iosBundleId: 'com.example.frontendFlutterProj',
   );

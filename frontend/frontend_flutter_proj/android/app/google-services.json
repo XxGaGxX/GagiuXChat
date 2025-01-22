@@ -51,12 +51,20 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:345328001724:android:e120fd549a2bf572fca6b9",
+        "mobilesdk_app_id": "1:345328001724:android:88bbe6143a2640a8fca6b9",
         "android_client_info": {
           "package_name": "com.example.frontend_flutter_proj"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "345328001724-62u2ajfu24le8nutrf8tt2r51iccihed.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.frontend_flutter_proj",
+            "certificate_hash": "b94f872e519b9cc0d21001284a6274826c91609e"
+          }
+        },
         {
           "client_id": "345328001724-p2qa4infaql0jo36i6aphe4gj948n8ic.apps.googleusercontent.com",
           "client_type": 3
