@@ -54,13 +54,14 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   List<types.Message> messages = [];
+  List<types.User> users = [];
 
   @override
   void initState() {
     super.initState();
     _loadMessage();
 
-    socket = IO.io('http://192.168.1.118:5000', <String, dynamic>{
+    socket = IO.io('http://192.168.1.122:5000', <String, dynamic>{
       "transports": ["websocket"]
     });
 
@@ -78,31 +79,20 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  // final _user = const types.User(
-  //   id: 'bfb6f760-bfdf-418f-8350-26031128e34e',
-  //   firstName: "Diego",
-  //   lastName: "Vagnini",
-  // );
-
-  // final _user = const types.User(
-  //   id: 'd74db2c2-32b0-4f56-88a2-041eaab1fc1b',
-  //   firstName: "Daniele",
-  //   lastName: "Vagnini",
-  // );
-
   var _user = types.User(
     id: '',
     firstName: "",
+    imageUrl: ""
   );
 
-  String room = 'room';
+  String room = '';
   late IO.Socket socket;
   final StreamController<String> _streamController = StreamController<String>();
-  String? _nomeUtente, _id, _errore;
+  String? _nomeUtente, _id, _errore, _image;
 
   @override
   Widget build(BuildContext context) {
-    if (_nomeUtente == null) {
+    if (_nomeUtente == null || _nomeUtente!.isEmpty) {
       return Scaffold(
         appBar: AppBar(
           title: Text(widget.title),
@@ -123,27 +113,57 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       );
     } else {
-      return Scaffold(
+      if (room.isEmpty) {
+        return Scaffold(
           appBar: AppBar(
             title: const Text("GagioX Chat"),
             backgroundColor: const Color.fromARGB(255, 57, 21, 118),
             foregroundColor: Colors.white,
           ),
-          body: Chat(
-            messages: messages, //abbiniamo il widget con i messaggi
-            onPreviewDataFetched: _handlePreviewDatafetched,
-            onSendPressed: _handleSendPressed,
-            showUserAvatars: true,
-            showUserNames: true,
-            user: _user,
-            theme: const DarkChatTheme(
-              backgroundColor: Colors.black,
-              seenIcon: Text(
-                "read",
-                style: TextStyle(fontSize: 10),
-              ),
+          body: ListView.builder(
+            padding: const EdgeInsets.all(10),
+            itemCount: users.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                  height: 75,
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 72.0,
+                        backgroundColor: Colors.black,
+                        backgroundImage: users[index].imageUrl != null
+                            ? NetworkImage(users[index].imageUrl!)
+                            : null,
+                      ),
+                      Text(users[index].firstName.toString())
+                    ],
+                  ));
+            },
+          ),
+        );
+      } else {
+        return Scaffold(
+            appBar: AppBar(
+              title: const Text("GagioX Chat"),
+              backgroundColor: const Color.fromARGB(255, 57, 21, 118),
+              foregroundColor: Colors.white,
             ),
-          ));
+            body: Chat(
+              messages: messages, //abbiniamo il widget con i messaggi
+              onPreviewDataFetched: _handlePreviewDatafetched,
+              onSendPressed: _handleSendPressed,
+              showUserAvatars: true,
+              showUserNames: true,
+              user: _user,
+              theme: const DarkChatTheme(
+                backgroundColor: Colors.black,
+                seenIcon: Text(
+                  "read",
+                  style: TextStyle(fontSize: 10),
+                ),
+              ),
+            ));
+      }
     }
   }
 
@@ -166,6 +186,8 @@ class _MyHomePageState extends State<MyHomePage> {
     } catch (e) {
       _showAlert("Error loading messages: $e");
     }
+
+    users = FindUsers();
   }
 
   Future<void> _login() async {
@@ -188,6 +210,7 @@ class _MyHomePageState extends State<MyHomePage> {
           setState(() {
             _nomeUtente = user.displayName;
             _id = user.uid;
+            _image = user.photoURL;
           });
           CredenzialiUtente();
         }
@@ -199,11 +222,24 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  List<types.User> FindUsers() {
+    List<types.User> users = [];
+    messages.forEach((element) async {
+      types.User user = element.author;
+      if (!users.contains(user) && user.id != _user.id) {
+        users.add(user);
+      }
+    });
+
+    return users;
+  }
+
   void CredenzialiUtente() async {
     setState(() {
       _user = types.User(
         id: _id!,
         firstName: _nomeUtente,
+        imageUrl: _image
       );
     });
   }
@@ -217,7 +253,8 @@ class _MyHomePageState extends State<MyHomePage> {
         author: types.User(
             id: bodyJson['author']['id'],
             firstName: bodyJson['author']['firstName'],
-            lastName: bodyJson['author']['lastName']),
+            lastName: bodyJson['author']['lastName'],
+            imageUrl: bodyJson['author']['imageUrl']),
         text: bodyJson['text'],
         id: bodyJson['id'],
         createdAt: DateTime.now().millisecondsSinceEpoch,

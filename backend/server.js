@@ -28,6 +28,7 @@ io.on("connection", (socket) => {
         firstName: data.author.firstName,
         lastName: data.author.lastName,
         id: data.author.id,
+        imageUrl : data.author.imageUrl
       },
       text: data.text,
       id: uuidv4(),
@@ -46,7 +47,9 @@ io.on("connection", (socket) => {
   });
 });
 
+
+const IP = process.env.IP || "0.0.0.0";
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, "192.168.1.118", () => {
-  console.log("Server in ascolto alla porta: " + PORT);
+server.listen(PORT, IP, () => {
+  console.log("Server in ascolto al socket: " +IP+ PORT);
 });
