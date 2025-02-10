@@ -79,16 +79,13 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  var _user = types.User(
-    id: '',
-    firstName: "",
-    imageUrl: ""
-  );
+  var _user = types.User(id: '', firstName: "", imageUrl: "");
 
   String room = '';
   late IO.Socket socket;
   final StreamController<String> _streamController = StreamController<String>();
   String? _nomeUtente, _id, _errore, _image;
+  String? _nomeUtenteDest, _idDest, _imageDest;
 
   @override
   Widget build(BuildContext context) {
@@ -121,22 +118,35 @@ class _MyHomePageState extends State<MyHomePage> {
             foregroundColor: Colors.white,
           ),
           body: ListView.builder(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(5),
             itemCount: users.length,
             itemBuilder: (BuildContext context, int index) {
-              return Container(
-                  height: 75,
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 72.0,
-                        backgroundColor: Colors.black,
-                        backgroundImage: users[index].imageUrl != null
-                            ? NetworkImage(users[index].imageUrl!)
-                            : null,
+              return Align(
+                  alignment: Alignment.centerLeft,
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        room = users[index].id;
+                        _nomeUtenteDest = users[index].firstName;
+                        _imageDest = users[index].imageUrl;
+                      });
+                    },
+                    child: Container(
+                      height: 60,
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 30.0,
+                            backgroundColor: Colors.black,
+                            backgroundImage: users[index].imageUrl != null
+                                ? NetworkImage(users[index].imageUrl!)
+                                : null,
+                          ),
+                          SizedBox(width: 10),
+                          Text(users[index].firstName.toString())
+                        ],
                       ),
-                      Text(users[index].firstName.toString())
-                    ],
+                    ),
                   ));
             },
           ),
@@ -186,8 +196,6 @@ class _MyHomePageState extends State<MyHomePage> {
     } catch (e) {
       _showAlert("Error loading messages: $e");
     }
-
-    users = FindUsers();
   }
 
   Future<void> _login() async {
@@ -213,6 +221,8 @@ class _MyHomePageState extends State<MyHomePage> {
             _image = user.photoURL;
           });
           CredenzialiUtente();
+          users = FindUsers();
+          socket.emit('join', _user.id);
         }
       }
     } catch (e) {
@@ -230,17 +240,12 @@ class _MyHomePageState extends State<MyHomePage> {
         users.add(user);
       }
     });
-
     return users;
   }
 
   void CredenzialiUtente() async {
     setState(() {
-      _user = types.User(
-        id: _id!,
-        firstName: _nomeUtente,
-        imageUrl: _image
-      );
+      _user = types.User(id: _id!, firstName: _nomeUtente, imageUrl: _image);
     });
   }
 

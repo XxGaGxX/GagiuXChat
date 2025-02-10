@@ -51,5 +51,5 @@ io.on("connection", (socket) => {
 const IP = process.env.IP || "0.0.0.0";
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, IP, () => {
-  console.log("Server in ascolto al socket: " +IP+ PORT);
+  console.log("Server in ascolto al socket: " + IP + ':' +PORT);
 });
