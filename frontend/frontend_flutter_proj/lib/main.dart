@@ -55,13 +55,14 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   List<types.Message> messages = [];
   List<types.User> users = [];
+  String IP = '192.168.1.122';
 
   @override
   void initState() {
     super.initState();
     _loadMessage();
 
-    socket = IO.io('http://192.168.1.122:5000', <String, dynamic>{
+    socket = IO.io('http://${IP}:5000', <String, dynamic>{
       "transports": ["websocket"]
     });
 
@@ -79,7 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  var _user = types.User(id: '', firstName: "", imageUrl: "");
+  var _user = const types.User(id: '', firstName: "", imageUrl: "");
 
   String room = '';
   late IO.Socket socket;
@@ -117,6 +118,47 @@ class _MyHomePageState extends State<MyHomePage> {
             backgroundColor: const Color.fromARGB(255, 57, 21, 118),
             foregroundColor: Colors.white,
           ),
+          drawer: Drawer(
+            child: ListView(
+              children: [
+                DrawerHeader(
+                  child: CircleAvatar(
+                    backgroundColor: Colors.black,
+                    backgroundImage: _user.imageUrl != null
+                        ? NetworkImage(_user.imageUrl!)
+                        : null,
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [Text("Hi " + _user.firstName!)],
+                ),
+                ListTile(
+                  title: const Text("Logout"),
+                  onTap: () {
+                    Logout();
+                  },
+                ),
+                ListTile(
+                  title: const Text("Change server IP"),
+                  subtitle: TextField(
+                    decoration: InputDecoration(
+                        suffixIcon: Icon(Icons.arrow_forward_ios_outlined)),
+                    onSubmitted: (value) {
+                      setState(() {
+                        IP = value;
+                        QuickAlert.show(
+                            context: context,
+                            type: QuickAlertType.info,
+                            text: IP);
+                      });
+                    },
+                  ),
+                  onTap: () {},
+                )
+              ],
+            ),
+          ),
           body: ListView.builder(
             padding: const EdgeInsets.all(5),
             itemCount: users.length,
@@ -131,7 +173,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         _imageDest = users[index].imageUrl;
                       });
                     },
-                    child: Container(
+                    child: SizedBox(
                       height: 60,
                       child: Row(
                         children: [
@@ -142,7 +184,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 ? NetworkImage(users[index].imageUrl!)
                                 : null,
                           ),
-                          SizedBox(width: 10),
+                          const SizedBox(width: 10),
                           Text(users[index].firstName.toString())
                         ],
                       ),
@@ -157,6 +199,48 @@ class _MyHomePageState extends State<MyHomePage> {
               title: const Text("GagioX Chat"),
               backgroundColor: const Color.fromARGB(255, 57, 21, 118),
               foregroundColor: Colors.white,
+            ),
+            drawer: Drawer(
+              child: ListView(
+                children: [
+                  DrawerHeader(
+                    child: CircleAvatar(
+                      backgroundColor: Colors.black,
+                      backgroundImage: _user.imageUrl != null
+                          ? NetworkImage(_user.imageUrl!)
+                          : null,
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [Text("Hi " + _user.firstName!)],
+                  ),
+                  ListTile(
+                    title: const Text("Logout"),
+                    onTap: () {
+                      Logout();
+                    },
+                  ),
+                  ListTile(
+                    title: const Text("Change server IP"),
+                    subtitle: TextField(
+                      decoration: InputDecoration(
+                        suffixIcon: Icon(Icons.arrow_forward_ios_outlined)
+                      ),
+                      onSubmitted: (value) {
+                        setState(() {
+                          IP = value;
+                          QuickAlert.show(
+                              context: context,
+                              type: QuickAlertType.info,
+                              text: IP);
+                        });
+                      },
+                    ),
+                    onTap: () {},
+                  )
+                ],
+              ),
             ),
             body: Chat(
               messages: messages, //abbiniamo il widget con i messaggi
@@ -198,6 +282,10 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  void ChangeServerIP() {
+    setState(() {});
+  }
+
   Future<void> _login() async {
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
@@ -229,6 +317,19 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {
         _errore = e.toString();
       });
+    }
+  }
+
+  Future<void> Logout() async {
+    try {
+      await GoogleSignIn().signOut();
+      setState(() {
+        _user = types.User(id: "", firstName: "", imageUrl: "");
+        _nomeUtente = null;
+        room = "";
+      });
+    } catch (e) {
+      setState(() {});
     }
   }
 
